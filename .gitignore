@@ -1,0 +1,11 @@
+# deps
+node_modules/
+.env*
+!.env.example
+
+# Drafts
+drafts/
+
+# Claude Code
+.claude/*
+!.claude/skills

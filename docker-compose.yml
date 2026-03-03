@@ -1,0 +1,13 @@
+services:
+  url-shortener:
+    image: ghcr.io/abustamam/url-shortener2:latest
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: 3000
+    restart: unless-stopped
+    networks:
+      - caddy_net  # must match the network your Caddy container is on
+
+networks:
+  caddy_net:
+    external: true
