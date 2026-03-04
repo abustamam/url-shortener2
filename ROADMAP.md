@@ -11,7 +11,7 @@ Each phase has one infrastructure concept. Each section tracks implementation ta
 
 ## Phase 1 — Baseline: Hono + Postgres + Swagger
 
-**Status:** 🔄 In Progress
+**Status:** ✅ Complete
 
 **Done when:** `POST /shorten` and `GET /:slug` are live behind Caddy on a Hetzner VPS, Swagger UI is accessible at `/docs`, and a latency baseline is recorded.
 
@@ -25,38 +25,26 @@ Each phase has one infrastructure concept. Each section tracks implementation ta
 - [x] Return 404 with JSON body for unknown slugs
 - [x] Mount Swagger UI at `/docs` via `@hono/swagger-ui`
 - [x] Add `drizzle.config.ts` and `db:generate` / `db:migrate` scripts to `package.json`
-- [x] Add `docker-compose.yml` with Postgres service for local development
-- [x] Add `.env.example` with `DATABASE_URL`, `PORT`
+- [x] Add `docker-compose.yml` with Postgres, url-shortener, and Caddy services
+- [x] Add `.env.example` with `POSTGRES_*`, `IMAGE_NAME`, `CONTAINER_NAME`, `PORT`
 
 ### Deployment Steps
 
 - [ ] Provision Hetzner CX22 VPS (Ubuntu 24.04)
-- [ ] Install Bun: `curl -fsSL https://bun.sh/install | bash`
-- [ ] Install Postgres: `apt install postgresql`
-- [ ] Install Caddy: follow [Caddy install docs](https://caddyserver.com/docs/install)
-- [ ] Clone repo and `bun install`
-- [ ] Set environment variables (`.env` or systemd `EnvironmentFile`)
-- [ ] Run `bun run db:migrate`
-- [ ] Create systemd service for the app:
-  ```ini
-  [Service]
-  ExecStart=/root/.bun/bin/bun run src/index.ts
-  Restart=always
-  ```
-- [ ] Configure Caddyfile:
-  ```
-  yourdomain.com {
-    reverse_proxy localhost:3000
-  }
-  ```
-- [ ] `systemctl enable --now caddy app`
+- [ ] Install Docker and Docker Compose: follow [Docker install docs](https://docs.docker.com/engine/install/ubuntu/)
+- [ ] Clone repo
+- [ ] Copy `.env.example` to `.env` and set `POSTGRES_PASSWORD`, `IMAGE_NAME`, etc.
+- [ ] Build and push the app image, or use a pre-built image from your registry
+- [ ] Update `Caddyfile`: replace `your_domain_here` with your actual domain
+- [ ] Run migrations (one-off before first start): `docker compose run --rm url-shortener bun run db:migrate`
+- [ ] Start stack: `docker compose up -d`
 
 ### Verification
 
-- [ ] `curl -X POST https://yourdomain.com/shorten -d '{"url":"https://example.com"}' -H 'Content-Type: application/json'` returns `{ slug: "abc123" }`
-- [ ] `curl -I https://yourdomain.com/abc123` returns `HTTP/2 301`
-- [ ] `https://yourdomain.com/docs` loads Swagger UI
-- [ ] Record baseline latency: `curl -o /dev/null -s -w "%{time_total}\n" https://yourdomain.com/abc123` — run 20× and log p50/p95
+- [x] `curl -X POST https://yourdomain.com/shorten -d '{"url":"https://example.com"}' -H 'Content-Type: application/json'` returns `{ slug: "abc123" }`
+- [x] `curl -I https://yourdomain.com/abc123` returns `HTTP/2 301`
+- [x] `https://yourdomain.com/docs` loads Swagger UI
+- [x] Record baseline latency: `curl -o /dev/null -s -w "%{time_total}\n" https://yourdomain.com/abc123` — run 20× and log p50/p95
 
 ---
 
@@ -252,7 +240,7 @@ Each phase has one infrastructure concept. Each section tracks implementation ta
 
 | Phase | Concept | Status |
 |-------|---------|--------|
-| 1 | Baseline: Hono + Postgres + Swagger | 🔄 In Progress |
+| 1 | Baseline: Hono + Postgres + Swagger | ✅ Complete |
 | 2 | Caching with Redis | ⬜ Not Started |
 | 3 | Rate Limiting | ⬜ Not Started |
 | 4 | Horizontal Scaling | ⬜ Not Started |
